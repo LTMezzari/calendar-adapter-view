@@ -44,7 +44,8 @@ dependencies {
     testImplementation libs.junit
     androidTestImplementation libs.junit.ext
     androidTestImplementation libs.espresso
-
+    //JodaTime
+    implementation libs.joda.time
     //Project
     implementation project(':calendar')
 }
