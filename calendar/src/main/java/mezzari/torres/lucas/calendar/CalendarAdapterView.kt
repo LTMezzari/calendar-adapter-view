@@ -4,16 +4,20 @@ import android.content.Context
 import android.database.DataSetObserver
 import android.util.AttributeSet
 import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.GridLayout
 import android.widget.LinearLayout
+import androidx.annotation.LayoutRes
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.view.setPadding
 import mezzari.torres.lucas.calendar.adapter.month.DefaultMonthAdapter
-import mezzari.torres.lucas.calendar.adapter.month.MonthAdapter
+import mezzari.torres.lucas.calendar.adapter.week.DefaultWeekAdapter
+import mezzari.torres.lucas.calendar.adapter.year.DefaultYearAdapter
 import org.joda.time.DateTime
+import androidx.core.content.res.use
 
 /**
  * @author Lucas T. Mezzari
@@ -24,6 +28,7 @@ class CalendarAdapterView @JvmOverloads constructor(
     attributeSet: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : LinearLayoutCompat(context, attributeSet, defStyleAttr) {
+    private val inflater: LayoutInflater = LayoutInflater.from(context)
 
     private val observer: DataSetObserver by lazy {
         object : DataSetObserver() {
@@ -68,17 +73,32 @@ class CalendarAdapterView @JvmOverloads constructor(
         }
     }
 
-    var headerView: View? = null
+    @LayoutRes
+    private var headerLayout: Int = -1
+    private var mHeaderView: View? = null
+    var headerView: View?
+        get() = mHeaderView
         set(value) {
-            field = value
-            field?.run {
+            mHeaderView?.run {
+                removeViewAt(0)
+            }
+            mHeaderView = value
+            mHeaderView?.run {
                 addView(this, 0)
             }
         }
-    var footerView: View? = null
+
+    @LayoutRes
+    private var footerLayout: Int = -1
+    private var mFooterView: View? = null
+    var footerView: View?
+        get() = mFooterView
         set(value) {
-            field = value
-            field?.run {
+            mFooterView?.takeIf { childCount >= 3 }?.run {
+                removeViewAt(2)
+            }
+            mFooterView = value
+            mFooterView?.takeIf { childCount >= 3 }?.run {
                 addView(this, 2)
             }
         }
@@ -94,15 +114,46 @@ class CalendarAdapterView @JvmOverloads constructor(
         setupView()
     }
 
+    private fun loadAttributes(context: Context, attributeSet: AttributeSet?) {
+        try {
+            context.obtainStyledAttributes(attributeSet, R.styleable.CalendarAdapterView, 0, 0)
+                .use { typedArray ->
+                    val adapterEnum =
+                        typedArray.getInt(R.styleable.CalendarAdapterView_calendar_type, 0)
+                    adapter = when (adapterEnum) {
+                        1 -> DefaultWeekAdapter(context)
+                        2 -> DefaultYearAdapter(context)
+                        else -> DefaultMonthAdapter(context)
+                    }
+
+                    headerLayout =
+                        typedArray.getResourceId(R.styleable.CalendarAdapterView_header_layout, -1)
+                    footerLayout =
+                        typedArray.getResourceId(R.styleable.CalendarAdapterView_footer_layout, -1)
+                }
+        } catch (e: Exception) {
+            if (BuildConfig.DEBUG)
+                e.printStackTrace()
+        }
+    }
+
     private fun setupView() {
         orientation = VERTICAL
         gravity = Gravity.CENTER_HORIZONTAL
-        adapter = DefaultMonthAdapter(context)
         setPadding(32)
 
-        //Header
-        headerView?.run { addView(headerView) }
-        //Calendar
+        addHeader()
+        addBody()
+        addFooter()
+    }
+
+    private fun addHeader() {
+        inflateAndPlaceView(mHeaderView, headerLayout) {
+            mHeaderView = it
+        }
+    }
+
+    private fun addBody() {
         if (this.isInEditMode) {
             addView(CalendarGridView(context).apply {
                 layoutParams = LinearLayout.LayoutParams(
@@ -117,15 +168,28 @@ class CalendarAdapterView @JvmOverloads constructor(
                 adapter = this@CalendarAdapterView.adapter
                 date = this@CalendarAdapterView.currentPageDate
             })
-        } else {
-            addView(pager)
+            return
         }
-        //Footer
-        footerView?.run { addView(footerView) }
+        addView(pager)
     }
 
-    private fun loadAttributes(context: Context, attributeSet: AttributeSet?) {
+    private fun addFooter() {
+        inflateAndPlaceView(mFooterView, footerLayout) {
+            mFooterView = it
+        }
+    }
 
+    private fun inflateAndPlaceView(view: View?, layout: Int, save: (view: View?) -> Unit) {
+        var newView = view
+        if (view == null && layout != -1) {
+            newView = inflater.inflate(layout, this, false)
+            save(newView)
+        }
+
+        newView?.run {
+            addView(newView)
+            return
+        }
     }
 
     fun nextPage() {

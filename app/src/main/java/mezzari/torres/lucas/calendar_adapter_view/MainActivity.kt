@@ -17,13 +17,12 @@ class MainActivity : AppCompatActivity() {
             binding.root
         })
 
-        binding.cvCalendar.headerView = TextView(this).apply {
-            textAlignment = LinearLayoutCompat.TEXT_ALIGNMENT_CENTER
-        }
-
-        binding.cvCalendar.onCalendarPageChanged = { _, header, _, date ->
+        binding.cvCalendar.onCalendarPageChanged = { _, header, footer, date ->
             (header as? TextView)?.run {
-                text = date.toString("MMMM yyyy")
+                text = date.toString("MMMM")
+            }
+            (footer as? TextView)?.run {
+                text = date.toString("yyyy")
             }
         }
 
