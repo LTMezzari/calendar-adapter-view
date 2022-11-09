@@ -1,0 +1,19 @@
+[versions]
+gradleplugin = "7.2.2"
+kotlin = "1.7.10"
+
+[libraries]
+core-ktx = { module = "androidx.core:core-ktx", version = "1.8.0" }
+app-compat = { module = "androidx.appcompat:appcompat", version = "1.5.1" }
+material = { module = "com.google.android.material:material", version = "1.7.0" }
+junit = { module = "junit:junit", version = "4.13.2" }
+junit-ext = { module = "androidx.test.ext:junit", version = "1.1.4" }
+espresso = { module = "androidx.test.espresso:espresso-core", version = "3.5.0" }
+joda-time = { module = "joda-time:joda-time", version = "2.12.1" }
+
+[bundles]
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "gradleplugin" }
+android-library = { id = "com.android.library", version.ref = "gradleplugin" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
