@@ -1,4 +1,4 @@
-package mezzari.torres.lucas.calendar
+package mezzari.torres.lucas.calendar.adapter
 
 import android.content.Context
 import android.view.View
@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.view.setPadding
+import mezzari.torres.lucas.calendar.CalendarAdapterView
 import org.joda.time.DateTime
 
 /**

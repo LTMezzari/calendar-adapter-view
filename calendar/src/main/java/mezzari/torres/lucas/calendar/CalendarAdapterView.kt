@@ -13,8 +13,8 @@ import android.widget.TextView
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.view.children
 import androidx.core.view.setPadding
+import mezzari.torres.lucas.calendar.adapter.MonthAdapter
 import org.joda.time.DateTime
-import java.time.Month
 
 /**
  * @author Lucas T. Mezzari
