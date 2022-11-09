@@ -1,4 +1,4 @@
-package mezzari.torres.lucas.calendar.adapter
+package mezzari.torres.lucas.calendar.adapter.week
 
 import android.content.Context
 import android.view.View
@@ -11,18 +11,10 @@ import org.joda.time.DateTime
 
 /**
  * @author Lucas T. Mezzari
- * @since 08/11/2022
+ * @since 09/11/22
  */
-open class WeekAdapter(private val context: Context) :
-    CalendarAdapterView.CalendarAdapter<WeekAdapter.WeekViewHolder>() {
-
-    override fun getColumnsCount(date: DateTime): Int {
-        return 7 // Monday, Sunday, Tuesday, Wednesday, Thursday, Friday, Saturday
-    }
-
-    override fun getRowsCount(date: DateTime): Int {
-        return 1
-    }
+internal class DefaultWeekAdapter(private val context: Context) :
+    WeekAdapter<DefaultWeekAdapter.WeekViewHolder>() {
 
     override fun onCreateViewHolder(viewType: Int, container: ViewGroup?): WeekViewHolder {
         val view = TextView(context)
@@ -30,18 +22,7 @@ open class WeekAdapter(private val context: Context) :
         return WeekViewHolder(view)
     }
 
-    override fun onBindViewHolder(
-        row: Int,
-        column: Int,
-        date: DateTime,
-        holder: WeekViewHolder
-    ) {
-        var startDate = date.withDayOfWeek(1)
-        startDate = startDate.plusDays(1 * column)
-        onBindDayViewHolder(startDate, date, holder)
-    }
-
-    open fun onBindDayViewHolder(
+    override fun onBindDayViewHolder(
         day: DateTime, date: DateTime, holder: WeekViewHolder
     ) {
         (holder.view as? TextView)?.apply {
@@ -54,14 +35,6 @@ open class WeekAdapter(private val context: Context) :
                 }
             )
         }
-    }
-
-    override fun getNextPage(current: DateTime): DateTime? {
-        return current.withDayOfWeek(1).plusDays(7)
-    }
-
-    override fun getPreviousPage(current: DateTime): DateTime? {
-        return current.withDayOfWeek(1).minusDays(7)
     }
 
     class WeekViewHolder(view: View) : CalendarAdapterView.ViewHolder(view)

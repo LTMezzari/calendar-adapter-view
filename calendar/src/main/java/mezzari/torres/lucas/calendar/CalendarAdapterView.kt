@@ -9,12 +9,10 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.GridLayout
 import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.view.setPadding
-import mezzari.torres.lucas.calendar.adapter.MonthAdapter
-import mezzari.torres.lucas.calendar.adapter.WeekAdapter
-import mezzari.torres.lucas.calendar.adapter.YearAdapter
+import mezzari.torres.lucas.calendar.adapter.month.DefaultMonthAdapter
+import mezzari.torres.lucas.calendar.adapter.month.MonthAdapter
 import org.joda.time.DateTime
 
 /**
@@ -99,7 +97,7 @@ class CalendarAdapterView @JvmOverloads constructor(
     private fun setupView() {
         orientation = VERTICAL
         gravity = Gravity.CENTER_HORIZONTAL
-        adapter = MonthAdapter(context)
+        adapter = DefaultMonthAdapter(context)
         setPadding(32)
 
         //Header

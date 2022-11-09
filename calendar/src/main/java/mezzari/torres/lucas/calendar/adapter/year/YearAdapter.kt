@@ -1,10 +1,5 @@
-package mezzari.torres.lucas.calendar.adapter
+package mezzari.torres.lucas.calendar.adapter.year
 
-import android.content.Context
-import android.view.View
-import android.view.ViewGroup
-import android.widget.TextView
-import androidx.core.view.setPadding
 import mezzari.torres.lucas.calendar.CalendarAdapterView
 import org.joda.time.DateTime
 
@@ -12,8 +7,8 @@ import org.joda.time.DateTime
  * @author Lucas T. Mezzari
  * @since 08/11/2022
  */
-open class YearAdapter(private val context: Context) :
-    CalendarAdapterView.CalendarAdapter<YearAdapter.YearViewHolder>() {
+abstract class YearAdapter<T : CalendarAdapterView.ViewHolder> :
+    CalendarAdapterView.CalendarAdapter<T>() {
     override fun getColumnsCount(date: DateTime): Int {
         /*
          * Jan, Feb, Mar
@@ -34,30 +29,20 @@ open class YearAdapter(private val context: Context) :
         return 4
     }
 
-    override fun onCreateViewHolder(viewType: Int, container: ViewGroup?): YearViewHolder {
-        val view = TextView(context)
-        view.setPadding(32)
-        return YearViewHolder(view)
-    }
-
     override fun onBindViewHolder(
         row: Int,
         column: Int,
         date: DateTime,
-        holder: YearViewHolder
+        holder: T
     ) {
         var startDate = DateTime(date.year, 1, 1, 0, 0)
         startDate = startDate.plusMonths(row * 3 + column)
         onBindMonthViewHolder(startDate, date, holder)
     }
 
-    open fun onBindMonthViewHolder(
-        month: DateTime, date: DateTime, holder: YearViewHolder
-    ) {
-        (holder.view as? TextView)?.apply {
-            text = month.toString("MMM")
-        }
-    }
+    abstract fun onBindMonthViewHolder(
+        month: DateTime, date: DateTime, holder: T
+    )
 
     override fun getNextPage(current: DateTime): DateTime? {
         return current.withDayOfMonth(1).withMonthOfYear(1).plusYears(1)
@@ -66,6 +51,4 @@ open class YearAdapter(private val context: Context) :
     override fun getPreviousPage(current: DateTime): DateTime? {
         return current.withDayOfMonth(1).withMonthOfYear(1).minusYears(1)
     }
-
-    class YearViewHolder(view: View) : CalendarAdapterView.ViewHolder(view)
 }

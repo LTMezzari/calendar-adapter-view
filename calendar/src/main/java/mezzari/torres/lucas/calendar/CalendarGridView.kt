@@ -8,10 +8,6 @@ import org.joda.time.DateTime
 
 /**
  * @author Lucas T. Mezzari
- * @author lucas.torres@dietbox.me
- * @author lucas.mezzari1@gmail.com
- *
- * @location Rio Grande do Sul, Brazil
  * @since 09/11/22
  */
 internal class CalendarGridView @JvmOverloads constructor(
