@@ -4,6 +4,7 @@
         <attr name="header_layout" format="reference" />
         <attr name="footer_layout" format="reference" />
         <attr name="calendar_type" format="enum">
+            <enum name="custom" value="-1" />
             <enum name="month" value="0" />
             <enum name="week" value="1" />
             <enum name="year" value="2" />

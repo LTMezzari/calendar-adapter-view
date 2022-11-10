@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.TextView
 import androidx.appcompat.widget.LinearLayoutCompat
 import mezzari.torres.lucas.calendar_adapter_view.databinding.ActivityMainBinding
+import org.joda.time.DateTime
 
 class MainActivity : AppCompatActivity() {
 
@@ -33,5 +34,7 @@ class MainActivity : AppCompatActivity() {
         binding.btnPrevious.setOnClickListener {
             binding.cvCalendar.previousPage()
         }
+
+        binding.cvCalendar.currentPageDate = DateTime.now().withDayOfYear(1)
     }
 }

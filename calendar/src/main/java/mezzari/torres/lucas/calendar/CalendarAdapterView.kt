@@ -8,7 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
-import android.widget.GridLayout
 import android.widget.LinearLayout
 import androidx.annotation.LayoutRes
 import androidx.appcompat.widget.LinearLayoutCompat
@@ -18,6 +17,8 @@ import mezzari.torres.lucas.calendar.adapter.week.DefaultWeekAdapter
 import mezzari.torres.lucas.calendar.adapter.year.DefaultYearAdapter
 import org.joda.time.DateTime
 import androidx.core.content.res.use
+import mezzari.torres.lucas.calendar.manager.CalendarGridView
+import mezzari.torres.lucas.calendar.manager.PagedLayoutManager
 
 /**
  * @author Lucas T. Mezzari
@@ -33,45 +34,49 @@ class CalendarAdapterView @JvmOverloads constructor(
     private val observer: DataSetObserver by lazy {
         object : DataSetObserver() {
             override fun onChanged() {
-                pager.update()
+                mLayoutManager.update()
             }
 
             override fun onInvalidated() {
-                pager.rebuild()
+                mLayoutManager.rebuild()
             }
         }
     }
 
-    var adapter: CalendarAdapter<*>?
-        get() = pager.adapter
+    private val listener: (DateTime, Int) -> Unit = { date, _ ->
+        onCalendarPageChanged?.invoke(this, headerView, footerView, date)
+    }
+
+    var adapter: Adapter<*>?
+        get() = mLayoutManager.adapter
         set(value) {
-            pager.adapter?.unregisterDataSetObserver(observer)
-            pager.adapter = value
-            pager.adapter?.registerDataSetObserver(observer)
+            mLayoutManager.adapter?.unregisterDataSetObserver(observer)
+            mLayoutManager.adapter = value
+            mLayoutManager.adapter?.registerDataSetObserver(observer)
         }
 
     var currentPageDate: DateTime
-        get() = pager.currentPageDate
+        get() = mLayoutManager.currentPageDate
         set(value) {
-            pager.currentPageDate = value
+            mLayoutManager.currentPageDate = value
             adapter?.notifyDataSetChanged()
         }
 
-    private val pager: CalendarPagerView by lazy {
-        CalendarPagerView(context).apply {
-            layoutParams = LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            ).apply {
-                setMargins(0, 16, 0, 16)
-                gravity = Gravity.CENTER_HORIZONTAL
+    private var mLayoutManager: LayoutManager = PagedLayoutManager(context)
+    var layoutManager: LayoutManager
+        get() = mLayoutManager
+        set(value) {
+            mLayoutManager.also {
+                removeView(it.getView())
             }
-            gravity = Gravity.CENTER_HORIZONTAL
-            onPageChanged = { _, new, _ ->
-                onCalendarPageChanged?.invoke(this@CalendarAdapterView, headerView, footerView, new)
+            mLayoutManager = value
+            mLayoutManager.onPageChanged = listener
+            if (childCount == 0) {
+                addView(mLayoutManager.getView())
+                return
             }
+            addView(mLayoutManager.getView(), 1)
         }
-    }
 
     @LayoutRes
     private var headerLayout: Int = -1
@@ -98,8 +103,8 @@ class CalendarAdapterView @JvmOverloads constructor(
                 removeViewAt(2)
             }
             mFooterView = value
-            mFooterView?.takeIf { childCount >= 3 }?.run {
-                addView(this, 2)
+            mFooterView?.run {
+                addView(this, childCount)
             }
         }
 
@@ -121,6 +126,7 @@ class CalendarAdapterView @JvmOverloads constructor(
                     val adapterEnum =
                         typedArray.getInt(R.styleable.CalendarAdapterView_calendar_type, 0)
                     adapter = when (adapterEnum) {
+                        -1 -> null
                         1 -> DefaultWeekAdapter(context)
                         2 -> DefaultYearAdapter(context)
                         else -> DefaultMonthAdapter(context)
@@ -140,7 +146,8 @@ class CalendarAdapterView @JvmOverloads constructor(
     private fun setupView() {
         orientation = VERTICAL
         gravity = Gravity.CENTER_HORIZONTAL
-        setPadding(32)
+
+        mLayoutManager.onPageChanged = listener
 
         addHeader()
         addBody()
@@ -157,20 +164,15 @@ class CalendarAdapterView @JvmOverloads constructor(
         if (this.isInEditMode) {
             addView(CalendarGridView(context).apply {
                 layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT
-                ).apply {
-                    setMargins(0, 16, 0, 16)
-                    gravity = Gravity.CENTER_HORIZONTAL
-                }
-                useDefaultMargins = true
-                gravity = Gravity.CENTER_HORIZONTAL
+                )
                 adapter = this@CalendarAdapterView.adapter
                 date = this@CalendarAdapterView.currentPageDate
             })
             return
         }
-        addView(pager)
+        addView(mLayoutManager.getView())
     }
 
     private fun addFooter() {
@@ -193,31 +195,69 @@ class CalendarAdapterView @JvmOverloads constructor(
     }
 
     fun nextPage() {
-        pager.nextPage()
+        mLayoutManager.nextPage()
     }
 
     fun previousPage() {
-        pager.previousPage()
+        mLayoutManager.previousPage()
     }
 
-    abstract class CalendarAdapter<T : ViewHolder> : BaseAdapter() {
-        abstract fun getColumnsCount(date: DateTime): Int
+    interface LayoutManager {
+        var adapter: Adapter<*>?
 
-        abstract fun getRowsCount(date: DateTime): Int
+        var currentPageDate: DateTime
 
-        abstract fun onCreateViewHolder(viewType: Int, container: ViewGroup?): T
+        var onPageChanged: ((DateTime, Int) -> Unit)?
 
-        abstract fun onBindViewHolder(row: Int, column: Int, date: DateTime, holder: T)
+        fun nextPage()
 
-        abstract fun getNextPage(current: DateTime): DateTime?
+        fun previousPage()
 
-        abstract fun getPreviousPage(current: DateTime): DateTime?
+        fun update()
 
-        open fun getItemViewType(row: Int, column: Int): Int {
+        fun rebuild()
+
+        fun getView(): View
+    }
+
+    interface Adapter<T : ViewHolder> {
+        fun getColumnsCount(date: DateTime): Int
+
+        fun getRowsCount(date: DateTime): Int
+
+        fun getView(
+            row: Int,
+            column: Int,
+            date: DateTime,
+            view: View?,
+            container: ViewGroup?
+        ): View
+
+        fun onCreateViewHolder(viewType: Int, container: ViewGroup?): T
+
+        fun onBindViewHolder(row: Int, column: Int, date: DateTime, holder: T)
+
+        fun getNextPage(current: DateTime): DateTime?
+
+        fun getPreviousPage(current: DateTime): DateTime?
+
+        fun getItemViewType(row: Int, column: Int): Int
+
+        fun notifyDataSetChanged()
+
+        fun notifyDataSetInvalidated()
+
+        fun registerDataSetObserver(observer: DataSetObserver?)
+
+        fun unregisterDataSetObserver(observer: DataSetObserver?)
+    }
+
+    abstract class CalendarAdapter<T : ViewHolder> : BaseAdapter(), Adapter<T> {
+        override fun getItemViewType(row: Int, column: Int): Int {
             return 0
         }
 
-        open fun getView(
+        override fun getView(
             row: Int,
             column: Int,
             date: DateTime,
@@ -232,11 +272,6 @@ class CalendarAdapterView @JvmOverloads constructor(
                 }
 
             onBindViewHolder(row, column, date, holder)
-            holder.view.layoutParams =
-                GridLayout.LayoutParams(GridLayout.spec(row), GridLayout.spec(column)).apply {
-                    setGravity(Gravity.CENTER_HORIZONTAL)
-                }
-
             return holder.view
         }
 

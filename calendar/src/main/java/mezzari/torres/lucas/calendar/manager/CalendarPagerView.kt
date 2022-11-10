@@ -1,4 +1,4 @@
-package mezzari.torres.lucas.calendar
+package mezzari.torres.lucas.calendar.manager
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -10,6 +10,7 @@ import android.widget.LinearLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
+import mezzari.torres.lucas.calendar.CalendarAdapterView
 import org.joda.time.DateTime
 
 /**
@@ -26,13 +27,8 @@ internal class CalendarPagerView @JvmOverloads constructor(
     private val onPageChangedCallback: ViewPager2.OnPageChangeCallback by lazy {
         object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
-                val date = (when (position) {
-                    0 -> adapter?.getPreviousPage(currentPageDate)
-                    2 -> adapter?.getNextPage(currentPageDate)
-                    else -> currentPageDate
-                }) ?: return
-
-                onPageChanged?.invoke(currentPageDate, date, position)
+                if (position != 1) return
+                onPageChanged?.invoke(currentPageDate, position)
             }
         }
     }
@@ -73,7 +69,7 @@ internal class CalendarPagerView @JvmOverloads constructor(
         )
     }
 
-    internal var adapter: CalendarAdapterView.CalendarAdapter<*>? = null
+    internal var adapter: CalendarAdapterView.Adapter<*>? = null
         @SuppressLint("NotifyDataSetChanged")
         set(value) {
             field = value
@@ -89,7 +85,7 @@ internal class CalendarPagerView @JvmOverloads constructor(
             pagerAdapter.notifyDataSetChanged()
         }
 
-    internal var onPageChanged: ((DateTime, DateTime, Int) -> Unit)? = null
+    internal var onPageChanged: ((DateTime, Int) -> Unit)? = null
 
     init {
         setupView()
@@ -128,7 +124,7 @@ internal class CalendarPagerView @JvmOverloads constructor(
     internal class CalendarPagerAdapter(private val context: Context) :
         RecyclerView.Adapter<CalendarPagerAdapter.CalendarViewHolder>() {
 
-        var adapter: CalendarAdapterView.CalendarAdapter<*>? = null
+        var adapter: CalendarAdapterView.Adapter<*>? = null
         var currentPageDate: DateTime = DateTime.now()
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CalendarViewHolder {
@@ -137,11 +133,7 @@ internal class CalendarPagerView @JvmOverloads constructor(
                     layoutParams = LinearLayout.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.MATCH_PARENT
-                    ).apply {
-                        setMargins(0, 16, 0, 16)
-                        gravity = Gravity.CENTER_HORIZONTAL
-                    }
-                    useDefaultMargins = true
+                    )
                 }
             )
         }
