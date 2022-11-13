@@ -2,7 +2,10 @@ package mezzari.torres.lucas.calendar_adapter_view
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.TextView
+import androidx.appcompat.widget.LinearLayoutCompat
 import mezzari.torres.lucas.calendar_adapter_view.databinding.ActivityMainBinding
+import org.joda.time.DateTime
 
 class MainActivity : AppCompatActivity() {
 
@@ -15,6 +18,15 @@ class MainActivity : AppCompatActivity() {
             binding.root
         })
 
+        binding.cvCalendar.onCalendarPageChanged = { _, header, footer, date ->
+            (header as? TextView)?.run {
+                text = date.toString("MMMM")
+            }
+            (footer as? TextView)?.run {
+                text = date.toString("yyyy")
+            }
+        }
+
         binding.btnNext.setOnClickListener {
             binding.cvCalendar.nextPage()
         }
@@ -22,5 +34,7 @@ class MainActivity : AppCompatActivity() {
         binding.btnPrevious.setOnClickListener {
             binding.cvCalendar.previousPage()
         }
+
+        binding.cvCalendar.currentPageDate = DateTime.now().withDayOfYear(1)
     }
 }

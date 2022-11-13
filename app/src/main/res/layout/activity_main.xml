@@ -10,6 +10,10 @@
         android:id="@+id/cv_calendar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:header_layout="@layout/layout_calendar_header"
+        app:footer_layout="@layout/layout_calendar_footer"
+        app:calendar_type="month"
+        android:layout_margin="32dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
