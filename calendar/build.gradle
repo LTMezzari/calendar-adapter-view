@@ -1,14 +1,32 @@
 plugins {
     alias libs.plugins.android.library
     alias libs.plugins.kotlin.android
+    id "maven-publish"
+}
+
+// Because the components are created only during the afterEvaluate phase, you must
+// configure your publications using the afterEvaluate() lifecycle method.
+afterEvaluate {
+    publishing {
+        publications {
+            // Creates a Maven publication called "release".
+            release(MavenPublication) {
+                // Applies the component for the release build variant.
+                from components.release
+
+                // You can then customize attributes of the publication as shown below.
+                groupId='com.github.LTMezzari'
+            }
+        }
+    }
 }
 
 android {
-    compileSdk 32
+    compileSdk compileVersion
 
     defaultConfig {
-        minSdk 21
-        targetSdk 32
+        minSdk minVersion
+        targetSdk compileVersion
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"

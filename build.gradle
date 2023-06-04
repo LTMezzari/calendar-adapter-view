@@ -5,6 +5,13 @@ plugins {
     alias libs.plugins.kotlin.android apply false
 }
 
+ext {
+    compileVersion = 33
+    minVersion = 21
+    codeVersion = 1
+    nameVersion = '1.0.0'
+}
+
 task clean(type: Delete) {
     delete rootProject.buildDir
 }

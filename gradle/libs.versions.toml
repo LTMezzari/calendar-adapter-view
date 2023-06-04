@@ -17,3 +17,4 @@ joda-time = { module = "joda-time:joda-time", version = "2.12.1" }
 android-application = { id = "com.android.application", version.ref = "gradleplugin" }
 android-library = { id = "com.android.library", version.ref = "gradleplugin" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+maven = { id = "maven-publish" }

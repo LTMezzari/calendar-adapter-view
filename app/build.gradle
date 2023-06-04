@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    compileSdk 32
+    compileSdk compileVersion
 
     viewBinding {
         enabled true
@@ -12,10 +12,10 @@ android {
 
     defaultConfig {
         applicationId "mezzari.torres.lucas.calendar_adapter_view"
-        minSdk 21
-        targetSdk 32
-        versionCode 1
-        versionName '1.0'
+        minSdk minVersion
+        targetSdk compileVersion
+        versionCode codeVersion
+        versionName nameVersion
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
