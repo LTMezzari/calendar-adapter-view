@@ -3,7 +3,7 @@ package mezzari.torres.lucas.calendar_adapter_view
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.TextView
-import androidx.appcompat.widget.LinearLayoutCompat
+import mezzari.torres.lucas.calendar_adapter_view.adapter.CustomMonthAdapter
 import mezzari.torres.lucas.calendar_adapter_view.databinding.ActivityMainBinding
 import org.joda.time.DateTime
 
@@ -17,6 +17,13 @@ class MainActivity : AppCompatActivity() {
             binding = it
             binding.root
         })
+
+        val date = DateTime.now().withDayOfYear(1)
+        binding.cvCalendar.adapter = CustomMonthAdapter(
+            this,
+            date.minusMonths(2),
+            date.plusMonths(2)
+        )
 
         binding.cvCalendar.onCalendarPageChanged = { _, header, footer, date ->
             (header as? TextView)?.run {
@@ -35,6 +42,6 @@ class MainActivity : AppCompatActivity() {
             binding.cvCalendar.previousPage()
         }
 
-        binding.cvCalendar.currentPageDate = DateTime.now().withDayOfYear(1)
+        binding.cvCalendar.currentPageDate = date
     }
 }

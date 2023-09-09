@@ -27,7 +27,18 @@ internal class CalendarPagerView @JvmOverloads constructor(
     private val onPageChangedCallback: ViewPager2.OnPageChangeCallback by lazy {
         object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
-                if (position != 1) return
+                if (pagerAdapter.itemCount < 3) {
+                    val date = when (position) {
+                        0 -> adapter?.getPreviousPage(currentPageDate)
+                        1 -> adapter?.getNextPage(currentPageDate)
+                        else -> null
+                    } ?: currentPageDate
+                    onPageChanged?.invoke(date, position)
+                    return
+                }
+                if (position != 1) {
+                    return
+                }
                 onPageChanged?.invoke(currentPageDate, position)
             }
         }
@@ -97,13 +108,20 @@ internal class CalendarPagerView @JvmOverloads constructor(
         recyclerView.addOnScrollListener(scrollBehaviour)
 
         viewPager.post {
-            if (adapter?.getPreviousPage(currentPageDate) != null)
+            if (adapter?.getPreviousPage(currentPageDate) != null) {
                 viewPager.setCurrentItem(1, false)
+                return@post
+            }
+            pagerAdapter.notifyItemChanged(viewPager.currentItem)
         }
     }
 
     internal fun nextPage() {
 //        val next = adapter?.getNextPage(currentPageDate) ?: return
+        if (adapter?.getPreviousPage(currentPageDate) == null) {
+            viewPager.setCurrentItem(1, true)
+            return
+        }
         viewPager.setCurrentItem(2, true)
     }
 
@@ -113,6 +131,10 @@ internal class CalendarPagerView @JvmOverloads constructor(
     }
 
     internal fun update() {
+        if (adapter?.getPreviousPage(currentPageDate) == null) {
+            pagerAdapter.notifyItemChanged(viewPager.currentItem)
+            return
+        }
         pagerAdapter.notifyItemChanged(1)
     }
 
@@ -196,12 +218,16 @@ internal class CalendarPagerView @JvmOverloads constructor(
             if (firstItemVisible == (itemCount - 1) && dx > 0) {
                 onMoveForward()
                 adapter.notifyItemChanged(1)
-                recyclerView.scrollToPosition(1)
+                if (itemCount == 3) {
+                    recyclerView.scrollToPosition(1)
+                }
                 adapter.notifyItemChanged(itemCount - 1)
             } else if (lastItemVisible == 0 && dx < 0) {
                 onMoveBackwards()
                 adapter.notifyItemChanged(1)
-                recyclerView.scrollToPosition(1)
+                if (itemCount == 3) {
+                    recyclerView.scrollToPosition(1)
+                }
                 adapter.notifyItemChanged(0)
             }
         }
