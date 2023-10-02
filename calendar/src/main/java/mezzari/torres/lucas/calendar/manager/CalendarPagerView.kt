@@ -112,13 +112,13 @@ internal class CalendarPagerView @JvmOverloads constructor(
                 viewPager.setCurrentItem(1, false)
                 return@post
             }
-            pagerAdapter.notifyItemChanged(viewPager.currentItem)
+            pagerAdapter.notifyItemChanged(0)
         }
     }
 
     internal fun nextPage() {
 //        val next = adapter?.getNextPage(currentPageDate) ?: return
-        if (adapter?.getPreviousPage(currentPageDate) == null) {
+        if (pagerAdapter.itemCount < 3) {
             viewPager.setCurrentItem(1, true)
             return
         }
@@ -131,7 +131,7 @@ internal class CalendarPagerView @JvmOverloads constructor(
     }
 
     internal fun update() {
-        if (adapter?.getPreviousPage(currentPageDate) == null) {
+        if (pagerAdapter.itemCount < 3) {
             pagerAdapter.notifyItemChanged(viewPager.currentItem)
             return
         }

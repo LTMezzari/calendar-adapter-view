@@ -34,7 +34,7 @@ internal class PagedLayoutManager(context: Context) : CalendarAdapterView.Layout
         CalendarPagerView(context).apply {
             layoutParams = LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
+                ViewGroup.LayoutParams.MATCH_PARENT
             )
         }
     }
